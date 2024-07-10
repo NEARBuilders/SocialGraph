@@ -37,8 +37,7 @@ export const Navigation = () => {
         </Link>
         <div className="navbar-nav pt-1">
           <button className="btn btn-secondary" onClick={action}>
-            {" "}
-            {label}{" "}
+            {label}
           </button>
         </div>
       </div>
