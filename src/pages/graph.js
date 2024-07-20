@@ -8,7 +8,7 @@ import Profile from "@/components/profile";
 
 export default function CommonsGraph() {
   const { signedAccountId, wallet } = useContext(NearContext);
-const buildCommonsAccount = "buildcommons.near"
+  const buildCommonsAccount = "buildcommons.near";
   const [accountIds, setAccountIds] = useState([
     "every.near",
     "hack.near",

@@ -8,6 +8,7 @@ export default function Attest({ selectedAccountId, graphId }) {
 
   const [graphEdge, setGraphEdge] = useState(null);
   const [inverseEdge, setInverseEdge] = useState(null);
+  const [isLoading, setLoading] = useState(false);
   async function getViaApiServer({ keys }) {
     const args = {
       keys,
@@ -45,6 +46,7 @@ export default function Attest({ selectedAccountId, graphId }) {
   };
 
   const attest = async () => {
+    setLoading(true);
     const signer = await wallet.getAccountConnection();
     const accessKeys = await signer.getAccessKeys();
     const key = (await wallet.selector).store.getState().accounts[0].publicKey;
@@ -53,7 +55,7 @@ export default function Attest({ selectedAccountId, graphId }) {
       publicKey: key,
       signer: signer,
     });
-
+    setLoading(false);
     console.log(transaction);
   };
   return (
@@ -61,11 +63,13 @@ export default function Attest({ selectedAccountId, graphId }) {
       {signedAccountId && (
         <>
           <button
-            disabled={loading ?? !signedAccountId}
+            disabled={isLoading ?? !signedAccountId}
             className={`btn btn-sm ${attested ? "btn-dark" : "btn-outline-dark"}`}
             onClick={attest}
           >
-            {attested ? (
+            {isLoading ? (
+              <span class="spinner-border spinner-border-sm"></span>
+            ) : attested ? (
               <i className="bi bi-x"></i>
             ) : (
               <i className="bi bi-plus"></i>

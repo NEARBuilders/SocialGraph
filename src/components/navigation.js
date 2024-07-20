@@ -26,15 +26,21 @@ export const Navigation = () => {
     <nav className="navbar navbar-expand-lg">
       <div className="container-fluid">
         <Link href="/" passHref legacyBehavior>
-          <Image
-            priority
-            src={NearLogo}
-            alt="NEAR"
-            width="30"
-            height="24"
-            className="d-inline-block align-text-top"
-          />
+          <div className="d-flex align-items-center gap-2">
+            <Image
+              priority
+              src={
+                "https://i.near.social/magic/large/https://near.social/magic/img/account/buildcommons.near"
+              }
+              alt="NEAR"
+              width="50"
+              height="50"
+              className="d-inline-block align-text-top rounded-circle"
+            />
+            <h6 className="mb-0"> Social Graph</h6>
+          </div>
         </Link>
+
         <div className="navbar-nav pt-1">
           <button className="btn btn-secondary" onClick={action}>
             {label}
