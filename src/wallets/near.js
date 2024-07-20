@@ -1,5 +1,5 @@
 // near api js
-import { providers, connect, keyStores } from "near-api-js";
+import { providers, connect, keyStores, WalletConnection } from "near-api-js";
 
 // wallet selector
 import { distinctUntilChanged, map } from "rxjs";
@@ -12,10 +12,12 @@ import { setupLedger } from "@near-wallet-selector/ledger";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupSender } from "@near-wallet-selector/sender";
 import { setupMintbaseWallet } from "@mintbase-js/wallet";
-import { getConfig } from "@/config";
+import { NetworkId, getConfig } from "@/config";
 
 const THIRTY_TGAS = "30000000000000";
 const NO_DEPOSIT = "0";
+
+const { nodeUrl, walletUrl, helperUrl, explorerUrl } = getConfig(NetworkId);
 
 export class Wallet {
   /**
@@ -38,6 +40,7 @@ export class Wallet {
    * @param {Function} accountChangeHook - a function that is called when the user signs in or out#
    * @returns {Promise<string>} - the accountId of the signed-in user
    */
+
   startUp = async (accountChangeHook) => {
     this.selector = setupWalletSelector({
       network: this.networkId,
@@ -164,19 +167,24 @@ export class Wallet {
     return providers.getTransactionLastResult(transaction);
   };
 
-  async getAccountConnection() {
-    const { nodeUrl, walletUrl, helperUrl, explorerUrl } = getConfig(
-      this.networkId,
-    );
-    const connectionConfig = {
-      networkId: this.networkId,
+  getConfig() {
+    return {
+      networkId: NetworkId,
       keyStore: new keyStores.BrowserLocalStorageKeyStore(),
       nodeUrl,
       walletUrl,
       helperUrl,
       explorerUrl,
     };
-    const nearConnection = await connect(connectionConfig);
+  }
+
+  async getAccountConnection() {
+    const nearConnection = await connect(getConfig());
     return await nearConnection.account(this.accountId);
+  }
+
+  async getWalletConnection() {
+    const nearConnection = await connect(getConfig());
+    return new WalletConnection(nearConnection, "social-graph");
   }
 }

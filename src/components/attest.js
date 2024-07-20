@@ -9,6 +9,7 @@ export default function Attest({ selectedAccountId, graphId }) {
   const [graphEdge, setGraphEdge] = useState(null);
   const [inverseEdge, setInverseEdge] = useState(null);
   const [isLoading, setLoading] = useState(false);
+  const [refresh, setRefresh] = useState(false);
   async function getViaApiServer({ keys }) {
     const args = {
       keys,
@@ -36,27 +37,43 @@ export default function Attest({ selectedAccountId, graphId }) {
         signer: wallet,
       }).then((data) => setInverseEdge(data));
     }
-  }, [accountId, signedAccountId]);
+  }, [accountId, signedAccountId, refresh]);
 
-  const loading = graphEdge === null || inverseEdge === null;
   const attested = graphEdge && Object.keys(graphEdge).length;
 
   const data = {
-    graph: { [graphId]: { [accountId]: attested ? null : "" } },
+    [signedAccountId]: {
+      graph: { [graphId]: { [accountId]: attested ? null : "" } },
+    },
   };
 
   const attest = async () => {
     setLoading(true);
     const signer = await wallet.getAccountConnection();
-    const accessKeys = await signer.getAccessKeys();
-    const key = (await wallet.selector).store.getState().accounts[0].publicKey;
+    const key = (await signer.getAccessKeys())?.[0].public_key;
+    const isWritePermissionGranted = await Social.isWritePermissionGranted({
+      granteePublicKey: key,
+      signer: signer,
+      key: `${signedAccountId}/graph/${graphId}/${accountId}`,
+    });
+    if (!isWritePermissionGranted) {
+      const grantWritePermission = await Social.grantWritePermission({
+        publicKey: key,
+        granteeAccountId: signedAccountId,
+        keys: [`${signedAccountId}/graph/${graphId}/${accountId}`],
+        signer: signer,
+      });
+      await signer.signAndSendTransaction(grantWritePermission);
+    }
     const transaction = await Social.set({
       data: data,
       publicKey: key,
       signer: signer,
     });
-    setLoading(false);
+    await signer.signAndSendTransaction(transaction);
     console.log(transaction);
+    setRefresh(!refresh);
+    setLoading(false);
   };
   return (
     <>
