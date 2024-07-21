@@ -22,3 +22,26 @@
   gap: 19px;
   width: 100%;
 }
+
+.face {
+  display: flex;
+  gap: 0.3rem;
+  max-height: 2.3em;
+  max-width: 2.3em;
+  min-height: 2.3em;
+  min-width: 2.3em;
+}
+
+.overlay {
+  max-height: 2.3em;
+  max-width: 2.3em;
+  min-height: 2.3em;
+  min-width: 2.3em;
+}
+
+.overlay img {
+  object-fit: cover;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+}

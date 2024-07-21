@@ -2,7 +2,7 @@ import { Social } from "@/config";
 import { NearContext } from "@/context";
 import { useContext, useEffect, useState } from "react";
 
-export default function Profile({ accountId }) {
+export default function Profile({ accountId, showName = true }) {
   const { wallet } = useContext(NearContext);
   const [profile, setProfile] = useState(null);
   async function getViaApiServer({ keys }) {
@@ -33,12 +33,14 @@ export default function Profile({ accountId }) {
   const imageSrc = `https://i.near.social/magic/large/https://near.social/magic/img/account/${accountId}`;
 
   return (
-    <div className="d-flex gap-2">
+    <div className="d-flex gap-2 w-100 h-100">
       <img src={imageSrc} height={40} width={40} className="rounded-circle" />
-      <div className="d-flex flex-column">
-        <h5 className="mb-0"> {name}</h5>
-        <div>{accountId}</div>
-      </div>
+      {showName && (
+        <div className="d-flex flex-column">
+          <h5 className="mb-0"> {name}</h5>
+          <div>{accountId}</div>
+        </div>
+      )}
     </div>
   );
 }

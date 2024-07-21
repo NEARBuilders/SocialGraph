@@ -167,10 +167,13 @@ export class Wallet {
     return providers.getTransactionLastResult(transaction);
   };
 
-  getConfig() {
+  getNetworkConfig() {
     return {
       networkId: NetworkId,
-      keyStore: new keyStores.BrowserLocalStorageKeyStore(),
+      keyStore: new keyStores.BrowserLocalStorageKeyStore(
+        localStorage,
+        "near-wallet-selector:",
+      ),
       nodeUrl,
       walletUrl,
       helperUrl,
@@ -179,12 +182,12 @@ export class Wallet {
   }
 
   async getAccountConnection() {
-    const nearConnection = await connect(getConfig());
+    const nearConnection = await connect(this.getNetworkConfig());
     return await nearConnection.account(this.accountId);
   }
 
   async getWalletConnection() {
-    const nearConnection = await connect(getConfig());
+    const nearConnection = await connect(this.getNetworkConfig());
     return new WalletConnection(nearConnection, "social-graph");
   }
 }
