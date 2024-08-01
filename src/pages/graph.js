@@ -5,6 +5,7 @@ import styles from "@/styles/app.module.css";
 import Attest from "@/components/attest";
 import D3Graph from "@/components/d3Graph";
 import Profile from "@/components/profile";
+import { getViaApiServer } from "@/utils/common";
 
 export default function CommonsGraph() {
   const { signedAccountId, wallet } = useContext(NearContext);
@@ -22,22 +23,6 @@ export default function CommonsGraph() {
       setAccountIds(newArray);
     }
   }, [signedAccountId]);
-
-  async function getViaApiServer({ keys }) {
-    const args = {
-      keys,
-    };
-
-    return await (
-      await fetch("https://api.near.social/get", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(args),
-      })
-    ).json();
-  }
 
   const [nodesState, setNodesState] = useState(null);
 

@@ -1,45 +1,27 @@
-import { Social } from "@/config";
+import { Social, getConfig } from "@/config";
 import { NearContext } from "@/context";
 import { useContext, useEffect, useState } from "react";
+import { getViaApiServer, transformActions } from "@/utils/common";
 
-export default function Attest({ selectedAccountId, graphId }) {
+export default function Attest({ selectedAccountId, graphId = "commons" }) {
+  const { socialDBContract } = getConfig();
   const { signedAccountId, wallet } = useContext(NearContext);
   const accountId = selectedAccountId || "every.near";
 
-  const [graphEdge, setGraphEdge] = useState(null);
-  const [inverseEdge, setInverseEdge] = useState(null);
   const [isLoading, setLoading] = useState(false);
   const [refresh, setRefresh] = useState(false);
-  async function getViaApiServer({ keys }) {
-    const args = {
-      keys,
-    };
-
-    return await (
-      await fetch("https://api.near.social/get", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(args),
-      })
-    ).json();
-  }
+  const [attested, setAttested] = useState(false);
 
   useEffect(() => {
     if (accountId && signedAccountId) {
       getViaApiServer({
         keys: [`${signedAccountId}/graph/${graphId}/${accountId}`],
         signer: wallet,
-      }).then((data) => setGraphEdge(data));
-      getViaApiServer({
-        keys: [`${accountId}/graph/${graphId}/${signedAccountId}/*`],
-        signer: wallet,
-      }).then((data) => setInverseEdge(data));
+      }).then((data) => {
+        setAttested(Object.keys(data ?? {}).length);
+      });
     }
   }, [accountId, signedAccountId, refresh]);
-
-  const attested = graphEdge && Object.keys(graphEdge).length;
 
   const data = {
     [signedAccountId]: {
@@ -48,32 +30,28 @@ export default function Attest({ selectedAccountId, graphId }) {
   };
 
   const attest = async () => {
-    setLoading(true);
-    const signer = await wallet.getAccountConnection();
-    const key = (await signer.getAccessKeys())?.[0].public_key;
-    const isWritePermissionGranted = await Social.isWritePermissionGranted({
-      granteePublicKey: key,
-      signer: signer,
-      key: `${signedAccountId}/graph/${graphId}/${accountId}`,
-    });
-    if (!isWritePermissionGranted) {
-      const grantWritePermission = await Social.grantWritePermission({
-        publicKey: key,
-        granteeAccountId: signedAccountId,
-        keys: [`${signedAccountId}/graph/${graphId}/${accountId}`],
-        signer: signer,
+    try {
+      setLoading(true);
+      const nearAccount = await wallet.getNearAccount();
+      const transaction = await Social.set({
+        data: data,
+        account: {
+          publicKey: nearAccount.publicKey,
+          accountID: nearAccount.accountId,
+        },
       });
-      await signer.signAndSendTransaction(grantWritePermission);
+      console.log(transaction);
+      const transformedActions = transformActions(transaction.actions);
+      await wallet.signAndSendTransaction({
+        contractId: socialDBContract,
+        actions: transformedActions,
+      });
+      setRefresh(!refresh);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error setting attest:", error);
+      setLoading(false);
     }
-    const transaction = await Social.set({
-      data: data,
-      publicKey: key,
-      signer: signer,
-    });
-    await signer.signAndSendTransaction(transaction);
-    console.log(transaction);
-    setRefresh(!refresh);
-    setLoading(false);
   };
   return (
     <>

@@ -7,6 +7,7 @@ import { Social } from "@/config";
 import { NearContext } from "@/context";
 import { useContext, useEffect, useState } from "react";
 import styles from "@/styles/app.module.css";
+import { getViaApiServer } from "@/utils/common";
 
 export default function Commons() {
   const { signedAccountId, wallet } = useContext(NearContext);
@@ -17,22 +18,6 @@ export default function Commons() {
 
   const accountId = signedAccountId ?? "every.near";
   const graphId = "commons";
-
-  async function getViaApiServer({ keys }) {
-    const args = {
-      keys,
-    };
-
-    return await (
-      await fetch("https://api.near.social/get", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(args),
-      })
-    ).json();
-  }
 
   useEffect(() => {
     if (accountId && signedAccountId) {

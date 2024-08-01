@@ -167,27 +167,21 @@ export class Wallet {
     return providers.getTransactionLastResult(transaction);
   };
 
-  getNetworkConfig() {
-    return {
-      networkId: NetworkId,
-      keyStore: new keyStores.BrowserLocalStorageKeyStore(
-        localStorage,
-        "near-wallet-selector:",
-      ),
-      nodeUrl,
-      walletUrl,
-      helperUrl,
-      explorerUrl,
-    };
-  }
+  getNearAccount = async () => {
+    const walletSelector = await this.selector;
+    const accounts = walletSelector.store.getState().accounts;
+    if (!accounts.length) throw new Error("No signed-in accounts found");
 
-  async getAccountConnection() {
-    const nearConnection = await connect(this.getNetworkConfig());
-    return await nearConnection.account(this.accountId);
-  }
+    return accounts[0];
+  };
 
-  async getWalletConnection() {
-    const nearConnection = await connect(this.getNetworkConfig());
-    return new WalletConnection(nearConnection, "social-graph");
-  }
+  signAndSendTransaction = async ({ contractId, actions }) => {
+    // Sign a transaction with the "FunctionCall" action
+    const selectedWallet = await (await this.selector).wallet();
+    const outcome = await selectedWallet.signAndSendTransaction({
+      receiverId: contractId,
+      actions: actions,
+    });
+    return providers.getTransactionLastResult(outcome);
+  };
 }

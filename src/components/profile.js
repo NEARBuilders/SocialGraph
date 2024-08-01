@@ -1,25 +1,12 @@
 import { Social } from "@/config";
 import { NearContext } from "@/context";
+import { getViaApiServer } from "@/utils/common";
 import { useContext, useEffect, useState } from "react";
 
 export default function Profile({ accountId, showName = true }) {
   const { wallet } = useContext(NearContext);
   const [profile, setProfile] = useState(null);
-  async function getViaApiServer({ keys }) {
-    const args = {
-      keys,
-    };
 
-    return await (
-      await fetch("https://api.near.social/get", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(args),
-      })
-    ).json();
-  }
   useEffect(() => {
     if (accountId) {
       getViaApiServer({
