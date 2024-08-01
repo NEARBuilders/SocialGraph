@@ -2,6 +2,8 @@ import { Social, getConfig } from "@/config";
 import { NearContext } from "@/context";
 import { useContext, useEffect, useState } from "react";
 import { getViaApiServer, transformActions } from "@/utils/common";
+import { toast } from "react-toastify";
+import Toast from "@/components/toast";
 
 export default function Attest({ selectedAccountId, graphId = "commons" }) {
   const { socialDBContract } = getConfig();
@@ -49,12 +51,14 @@ export default function Attest({ selectedAccountId, graphId = "commons" }) {
       setRefresh(!refresh);
       setLoading(false);
     } catch (error) {
+      toast.error(error.message);
       console.error("Error setting attest:", error);
-      setLoading(false);
+      setLoading(false); 
     }
   };
   return (
     <>
+      <Toast />
       {signedAccountId && (
         <>
           <button
