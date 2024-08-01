@@ -21,6 +21,7 @@ export default function Attest({ selectedAccountId, graphId = "commons" }) {
         signer: wallet,
       }).then((data) => {
         setAttested(Object.keys(data ?? {}).length);
+        setLoading(false);
       });
     }
   }, [accountId, signedAccountId, refresh]);
@@ -49,7 +50,6 @@ export default function Attest({ selectedAccountId, graphId = "commons" }) {
         actions: transformedActions,
       });
       setRefresh(!refresh);
-      setLoading(false);
     } catch (error) {
       toast.error(error.message);
       console.error("Error setting attest:", error);
