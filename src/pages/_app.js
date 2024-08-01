@@ -6,6 +6,7 @@ import { Navigation } from "@/components/navigation";
 
 import { Wallet } from "@/wallets/near";
 import { NetworkId, getConfig } from "@/config";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const wallet = new Wallet({
   createAccessKeyFor: getConfig().socialDBContract,

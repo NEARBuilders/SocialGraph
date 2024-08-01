@@ -1,6 +1,5 @@
 import styles from "@/styles/app.module.css";
 import CommonsGraph from "./graph";
-import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function Home() {
   return (
