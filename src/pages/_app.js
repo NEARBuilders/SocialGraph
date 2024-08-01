@@ -5,10 +5,10 @@ import { NearContext } from "@/context";
 import { Navigation } from "@/components/navigation";
 
 import { Wallet } from "@/wallets/near";
-import { NetworkId, SocialDBContract } from "@/config";
+import { NetworkId, getConfig } from "@/config";
 
 const wallet = new Wallet({
-  createAccessKeyFor: SocialDBContract,
+  createAccessKeyFor: getConfig().socialDBContract,
   networkId: NetworkId,
 });
 

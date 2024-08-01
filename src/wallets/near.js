@@ -1,5 +1,5 @@
 // near api js
-import { providers } from "near-api-js";
+import { providers, connect, keyStores, WalletConnection } from "near-api-js";
 
 // wallet selector
 import { distinctUntilChanged, map } from "rxjs";
@@ -12,9 +12,12 @@ import { setupLedger } from "@near-wallet-selector/ledger";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupSender } from "@near-wallet-selector/sender";
 import { setupMintbaseWallet } from "@mintbase-js/wallet";
+import { NetworkId, getConfig } from "@/config";
 
 const THIRTY_TGAS = "30000000000000";
 const NO_DEPOSIT = "0";
+
+const { nodeUrl, walletUrl, helperUrl, explorerUrl } = getConfig(NetworkId);
 
 export class Wallet {
   /**
@@ -29,6 +32,7 @@ export class Wallet {
   constructor({ networkId = "testnet", createAccessKeyFor = undefined }) {
     this.createAccessKeyFor = createAccessKeyFor;
     this.networkId = networkId;
+    this.accountId = null;
   }
 
   /**
@@ -36,6 +40,7 @@ export class Wallet {
    * @param {Function} accountChangeHook - a function that is called when the user signs in or out#
    * @returns {Promise<string>} - the accountId of the signed-in user
    */
+
   startUp = async (accountChangeHook) => {
     this.selector = setupWalletSelector({
       network: this.networkId,
@@ -66,7 +71,7 @@ export class Wallet {
         )?.accountId;
         accountChangeHook(signedAccount);
       });
-
+    this.accountId = accountId;
     return accountId;
   };
 
@@ -160,5 +165,23 @@ export class Wallet {
     // Retrieve transaction result from the network
     const transaction = await provider.txStatus(txhash, "unnused");
     return providers.getTransactionLastResult(transaction);
+  };
+
+  getNearAccount = async () => {
+    const walletSelector = await this.selector;
+    const accounts = walletSelector.store.getState().accounts;
+    if (!accounts.length) throw new Error("No signed-in accounts found");
+
+    return accounts[0];
+  };
+
+  signAndSendTransaction = async ({ contractId, actions }) => {
+    // Sign a transaction with the "FunctionCall" action
+    const selectedWallet = await (await this.selector).wallet();
+    const outcome = await selectedWallet.signAndSendTransaction({
+      receiverId: contractId,
+      actions: actions,
+    });
+    return providers.getTransactionLastResult(outcome);
   };
 }
