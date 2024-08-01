@@ -53,7 +53,7 @@ export default function Attest({ selectedAccountId, graphId = "commons" }) {
     } catch (error) {
       toast.error(error.message);
       console.error("Error setting attest:", error);
-      setLoading(false); 
+      setLoading(false);
     }
   };
   return (

@@ -38,7 +38,7 @@ export default function ProfileSearch({ onChange, debug, limit = 30 }) {
       );
     };
 
-    Object.entries(profiles).forEach(([accountId, data]) => {
+    Object.entries(profiles ?? {}).forEach(([accountId, data]) => {
       const accountIdScore = computeScore(accountId);
       const name = data.profile.name || "";
       const tags = Object.keys(data.profile.tags || {}).slice(0, 10);
